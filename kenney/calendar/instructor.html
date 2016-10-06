@@ -1,0 +1,218 @@
+
+<a name="calendarlink"></a>
+<h3>Calendar Version 4</h3>
+<p>
+  Welcome to Version 4 of the auto generating calender scripts.  This version was a
+  complete update to standardize on the bootstrap and skeleton css libraries, and
+  continues with the return-to-basics mentality of version 3.capabilities, but with
+  significant improvements provided by the move to PHP.  This version includes:
+  <b>protected directory structures</b>, <b>site specific CSS</b>,
+  <b>date based file unlocking for students</b>, and a <b>highly configurable box design.</b>
+  Additionally the number of configuration files has been reduced considerably.
+</p>
+<p>
+  Once you log onto the system, you can view the calendar unfettered and see all files
+  in each of the class directories.  You can click on individual dates in the calendar
+  and see all of the files that are hidden in those directories (under the name of the lecture).
+  Depending on how you
+  configure security, hopefully properly configured .htaccess files, this may be the
+  only way to view these files via the web.
+</p>
+<h4>Calendar Configuration Files:</h4>
+<p>
+  <a href=calendar.php>calendar.php</a> Primary Configuration file for the calendar. <b>Edit this file.</b><br>
+</p>
+
+<a name="structure"></a>
+<h4>Directory Structure:</h4>
+<p>
+  The calendar expects a directory structure where all specific types of classes are in their own directory.  For example, lectures in one directory, labs in another, review sessions in another, etc.  These subdirectories must be in alphabetical order.
+  <pre><code class="makefile">classes/
+classes/01.Introduction to this course
+classes/02.The first class
+classes/02.The first class/notes.txt
+labs/
+labs/01.The first lab</code></pre>
+  Directory Names, and expected file names are configured and specified in the configuration file (<a href=calendar.php>calendar.php</a>).
+</p>
+<h4>HTML</h4>
+<p>
+  The calendar system will present processed HTML files to your users
+  in a way that will hopefully save you time in producing content.
+  The default CSS for presented pages is the <b>skeleton boilerplate CSS</b> provided
+  at <a href="http://getskeleton.com">getskeleton.com</a> used in conjunction with
+  the bootstrap CSS libraries <a href="http://getbootstrap.com">getbootstrap.com</a>,
+  the floating topbar will be automatically generated for you (see notes below),
+  and all of the options listed on that page are available in your webpage design.
+  All of the headers and CSS will be automatically generated for you allowing you to
+  start with simple HTML.
+</p>
+
+<a name="images"></a>
+<h4>HTML &amp; Images</h4>
+<p>
+  HTML files are automatically processed and image names are replaced with the
+  appropriately protected links.  To support this the calendar system expects
+  that the image filename will always be the first element of the tag, example:
+</p>
+<pre><code class="html">&lt;img src="picture.jpg" width="50%"&gt;</code></pre>
+<p>
+  The image files must be located in the <b>same</b> directory as the html,
+  deeper directory structures are only possible using links
+  (which may not be protected and therefore is not recommended).
+</p>
+
+<a name="links"></a>
+<h4>HTML &amp; Links</h4>
+<p>
+  Similarly to the way that images are handled, you can link to other files that
+  exist in the <b>same</b> directory.  The format of the tag must start with
+  <b>&lt;a href="</b> for the system to properly identify it as a servable link, example:
+</p>
+<pre><code class="html">&lt;a href="additional.html" id="ifyouwantone" ... &gt;</code></pre>
+
+<a name="menus"></a>
+<h4>HTML &amp; Automatic Menubar Generation</h4>
+<p>
+  HTML files will be searched for the <b> &lt;a name=""&gt; </b> tags, and this data
+  will be used to build a menubar at the top of the prepared HTML.  If you
+  use <b>:</b> (Semicolons), then you can create dynamic menus with subcategories
+  that link to specific portions on your page.  As an example, if the following was
+  in an HTML file:
+</p>
+<pre><code class="html">&lt;a name="Intro" id="Intro"&gt;&lt;/a&gt;
+Welcome to the class ...
+&lt;a name="Notes" id="One"&gt;&lt;/a&gt;
+...
+&lt;a name="Problems" id="Problems"&gt;&lt;/a&gt;</code></pre>
+<p>
+  <b>Note: No spaces in links!</b>  If you want to use spaces in your names,
+  replace them with a <b>-</b> instead, the system will automatically replace
+  them for you on the top bar.  Example:
+</p>
+<pre><code class="html">&lt;a name="Intro-to-CS" id="Intro-to-CS"&gt;&lt;/a&gt;</code></pre>
+<p>
+  If you are having issues getting the locations to line up correctly,
+  you can surround each area with it's own <b>&lt;div&gt;</b> class, example:
+  <pre><code class="html">&lt;a name="tables"&gt;&lt;/a&gt;
+&lt;div class="docs-section" id="tables"&gt;
+...
+&lt;/div&gt;</code></pre>
+</p>
+
+<a name="timelock"></a>
+<h4>Setting files to be available on a certain date:</h4>
+<p>
+  Unless you are logged on, the system will automatically check the naming of
+  all files to see if they are available to students.  This is particularly
+  useful when you use symbolic linking, with an expected filename linked to
+  specifically named file:
+</p>
+<pre><code class="html">Unlocked file: <b>my_powerpoint.ppt</b></code></pre>
+<p>
+  To make this file become available on <b>December 15th</b> rename the file
+  to have the following convention:
+</p>
+<pre><code class="html">Locked file: <b>my_powerpoint.12.15.pptx</b></code></pre>
+<p>
+  Assuming that you have configured <a href=calendar.php>calendar.php</a> so that
+  slides.pptx is set to present as a clickable day title (default), if it finds a
+  slides.pptx file it will present it to the user.  If that file is linked to a
+  date restricted file, it will not be available until that date.  Reminder: To
+  make a symbolic link on linux, using the example names above:
+</p>
+<pre><code class="html">user@workstation$ <b>ln -s my_powerpoint.12.15.pptx slides.pptx</b></code></pre>
+
+<p>
+  There is also the option of using a consolidated access file for time based opening.
+  The file, which is named in the variable <b>$ACCESS_FILE</b> in <a href=calendar.php>calendar.php</a>,
+  can be used as a
+  central location for setting these accesses.  The format is simply <b>filename</b>,
+  <b>Month</b>, and <b>Day</b> each separated by a tab.  Below is an example file.
+</p>
+<pre><code class="html">homework01.html	12	15
+class/01.Course Overview/intro.html	12	15</code></pre>
+<p>
+  You can set either the complete path, or just a filename.  <b>Note:</b> if you
+  use just a filename, it will catch all instances throughout the directory structure.
+  In the case above, the file homework01.html, wherever is resides, will not be available until December 15th.
+</p>
+<p>
+  Additionally, you are able to use generic representations for classes and events then explicitly calling
+  out their filenames!
+</p>
+<pre><code class="html">class_1/homework  12  15
+class_2/all   12  15
+class_2       12  15  &lt;-- this has the same effect as the line above
+lab_3/filename.ext  12  15</code></pre>
+
+<a name="vfiles"></a>
+<h4>Virtual Files</h4>
+<p>
+  In the event that you would like to have a specific location outside of the standard structure for
+  storing files, you can create <b>virtual files</b> via a <b>class file</b>.
+  The name is defined by $CLASS_FILE in the configuration file <a href=calendar.php>calendar.php</a> , and has
+  a simple format: <b>virtual filename</b>, <b>actual filename</b>, <b>component type</b>,
+  and <b>component number</b> each separated by a tab.  Below is an example file.
+</p>
+<pre><code class="html">notes.html	homework/homework01.html	lab	1
+notes.tex 	docs/latex-template.tex 	class 	4</code></pre>
+<p>
+  These files will appear on that specific day whenever they occur.  In the example above
+  lab 1 would have the files notes.html added (which links to homework/homework01.html)
+  and class 4 would have a notes.tex files available (linking to docs/latex-template.tex).
+</p>
+
+<a name="notes"></a>
+<h4>Embedding Instructor Notes</h4>
+<p>
+  The system allows you to embed notes into the html files that can only be viewed by instructors who are logged on
+  by using <b>&lt;inst&gt; ... &lt;/inst&gt;</b> tags.
+</p>
+<pre><code class="html">&lt;inst&gt;
+  &lt;font size=3 color="#D11677"&gt;&lt;b&gt;Instructor Note&lt;/b&gt;:
+    These notes will only be visible to &lt;b&gt;instructors&lt;/b&gt;
+  &lt;/font&gt;
+&lt;/inst&gt;</code></pre>
+
+<h4>Embedding Revealable Answers</h4>
+<p>
+  Similar to the <b>inst</b>ructor tag above, if you would like to hide answers to selected problems for the students
+  use <b>&lt;student&gt; ... &lt;/student&gt;</b> tags, on the page view a little magnifying glass
+  will appear that will allow them to see these notes.
+</p>
+<pre><code class="html">&lt;student&gt;
+  &lt;pre&gt;&lt;code class="php"&gt;
+    $answer = "Provide the answers to your students.";
+  &lt;/code&gt;&lt;/pre&gt;
+&lt;/student&gt;</code></pre>
+
+<h4>Embedding other files or source code</h4>
+<p>
+  If you would like to include another file (html, source code, etc), in your HTML files, the system can inject
+  that file into the results and process the contents as if they were part of the initial web page.  There are
+  two tags that will become useful.  <b>&lt;inject&gt;</b> and <b>&lt;codeinject&gt;</b>, the difference between
+  the two tags is that <b>&lt;codeinject&gt;</b> will replace any <b>&lt;</b> or <b>&gt;</b> signs with the
+  appropriate HTML so that they will be displayed correctly.
+</p>
+<pre><code class="html">&lt;inject src="subdirector/example2.html"&gt;</code></pre>
+<pre><code class="html">&lt;codeinject src="Example.java"&gt;</code></pre>
+In a more useful example:
+<pre><code class="html">&lt;pre&gt;
+  &lt;code class="java"&gt;
+    &lt;codeinject src="Example.java"&gt;
+  &lt;/code&gt;
+&lt;/pre&gt;</code></pre>
+
+<h4>Providing Search Links</h4>
+<p>
+  The Calendar will allow you embed code that will search for keywords or general text using
+  <b>&lt;keyword&gt;</b> or <b>&lt;search&gt;</b> tags.
+</p>
+<pre><code class="html">&lt;keyword src="Problems"&gt;</code></pre>
+<pre><code class="html">&lt;search src="Interesting"&gt;</code></pre>
+<p>
+  Keywords are sections defined by <b> &lt;a name=""&gt; </b> tags (as seen above), while
+  generic searches will look for any content.  <b>Note:</b> these features are case sensitive, and
+  searching will accept regular expressions.
+</p>
