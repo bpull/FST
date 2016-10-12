@@ -2,7 +2,26 @@
 #start session
 #TODO returieve old session data
 session_start();
+require_once('mysql.inc.php');    # MySQL Connection Library
+$db = new myConnectDB();          # Connect to MySQL
 
+if (mysqli_connect_errno())
+{
+    echo "<h5>ERROR: " . mysqli_connect_errno() . ": " . mysqli_connect_error() . " </h5><br>";
+}
+
+if(isset($_GET['username']) && $_['username'] != ""){
+  $query = "SELECT password FROM auth_pass WHERE user = ?";
+  $stmt = $db->stmt_init();
+  $stmt->prepare($query);
+  $stmt->bind_param("s",$_GET['username']);
+  $result = $stmt->execute();
+  $stmt->bind_result($password);
+  $stmt->fetch()
+  echo "<script>alert('$password')</script>";
+  $stmt->close();
+
+}
  ?>
  <HTML>
     <head>
