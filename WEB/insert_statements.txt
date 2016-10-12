@@ -1,0 +1,2 @@
+INSERT INTO auth_user (user,displayname,first,last)
+VALUES ('m172412@usna.edu','Micky Hall','Micky','Hall');
