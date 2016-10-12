@@ -1,2 +1,29 @@
+//Micky Hall
 INSERT INTO auth_user (user,displayname,first,last)
 VALUES ('m172412@usna.edu','Micky Hall','Micky','Hall');
+
+INSERT INTO auth_access (user,access,value)
+VALUES ('m172412@usna.edu','user','1');
+
+
+//Brandon Pullig
+INSERT INTO auth_user (user,displayname,first,last)
+VALUES ('m175148@usna.edu','Brandon Pullig','Brandon','Pullig');
+
+INSERT INTO auth_access (user,access,value)
+VALUES ('m175148@usna.edu','user','1');
+
+INSERT INTO auth_pass (user,password)
+VALUES ('m175148@usna.edu','$2y$10$SPVHvcw0HTjra.hoYBVTOuOz.b7K4slH8no0jL4yoXVrSBJodojRG');
+
+INSERT INTO fgst_data (user) VALUES ('m175418@usna.edu');
+
+//Miss Schroeder
+INSERT INTO auth_user (user,displayname,first,last)
+VALUES ('grantsspecialist@usna.edu','Jean Schroeder','Jean','Schroeder');
+
+INSERT INTO auth_access (user,access,value)
+VALUES ('grantsspecialist@usna.edu','admin','2');
+
+INSERT INTO auth_pass (user,password)
+VALUES ('grantsspecialist@usna.edu','$2y$10$kwCrc/7se.hfdOnZ1KE3B.Is55/TLgblRiY5ZK.Krd6Jhb9/GNcWq'); //sudo

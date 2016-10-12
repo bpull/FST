@@ -2,44 +2,28 @@
 #start session
 #TODO returieve old session data
 session_start();
+'''
 require_once('mysql.inc.php');    # MySQL Connection Library
 $db = new myConnectDB();          # Connect to MySQL
-$phrase = "pleaserefrainfromfallingdowntherabbithole";
 
 if (mysqli_connect_errno())
 {
     echo "<h5>ERROR: " . mysqli_connect_errno() . ": " . mysqli_connect_error() . " </h5><br>";
 }
-
-
-
-
-
-if(isset($_POST['username']) && $_POST['username'] != ""){
-  $query="SELECT password FROM auth_pass WHERE user = ?";
+'''
+if(isset($_GET['username']) && $_['username'] != ""){
+'''
+  $query = "SELECT password FROM auth_pass WHERE user = ?";
   $stmt = $db->stmt_init();
   $stmt->prepare($query);
-  $stmt->bind_param('s', $_POST['username']);
+  $stmt->bind_param("s",$_GET['username']);
   $result = $stmt->execute();
-  $stmt->bind_result($pwd);
-  $stmt->fetch();
-  $stmt->close();
-  if(password_verify($_POST['password'],$pwd)){
-    $_SESSION['user'] = $_POST['username'];
-    $query="SELECT access FROM auth_access WHERE user = ?";
-    $stmt = $db->stmt_init();
-    $stmt->prepare($query);
-    $stmt->bind_param('s', $_POST['username']);
-    $result = $stmt->execute();
-    $stmt->bind_result($access);
-    $stmt->fetch();
-    $stmt->close();
-    $_SESSION['access'] = $access;
-    header("Location: user.php");
-  }
-  else{
-    echo "<script>alert('Username/Password do not match')</script>";
-  }
+  $stmt->bind_result($password);
+  $stmt->fetch()
+'''
+  echo "<script>alert('hi')</script>";
+#  $stmt->close();
+
 }
 
  ?>
@@ -62,7 +46,7 @@ if(isset($_POST['username']) && $_POST['username'] != ""){
       <div class="login">
         <div id="login_title">Enter your Username and Password</div>
         <div class="login_user">
-          <form action="index.php" method="post">
+          <form action="index.php" method="get">
             <table>
               <tbody>
                 <tr>

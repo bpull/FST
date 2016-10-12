@@ -44,3 +44,15 @@ CREATE TABLE `auth_pass` (
  CONSTRAINT FK_auth_pass_user FOREIGN KEY(user)
   REFERENCES auth_user (user)
   ON DELETE CASCADE ON UPDATE CASCADE);
+
+  #store users and password
+  DROP TABLE IF EXISTS fgst_data;
+  CREATE TABLE `fgst_data` (
+   `user` VARCHAR(45) NOT NULL,
+   `original` FLOAT NOT NULL DEFAULT 0,
+   `used` FLOAT NOT NULL DEFAULT 0,
+   `current` FLOAT NOT NULL DEFAULT 0,
+   CONSTRAINT PK_fgst_data PRIMARY KEY (user),
+   CONSTRAINT FK_fgst_data_user FOREIGN KEY(user)
+    REFERENCES auth_user (user)
+    ON DELETE CASCADE ON UPDATE CASCADE);
