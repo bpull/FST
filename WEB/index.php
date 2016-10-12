@@ -12,7 +12,9 @@ if (mysqli_connect_errno())
 }
 
 
-
+if(isset($_SESSION['user']) || isset($_SESSION['access'])){
+    header("Location: user.php");
+}
 
 
 if(isset($_POST['username']) && $_POST['username'] != ""){

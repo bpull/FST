@@ -45,7 +45,7 @@ CREATE TABLE `auth_pass` (
   REFERENCES auth_user (user)
   ON DELETE CASCADE ON UPDATE CASCADE);
 
-  #store users and password
+  #store money data
   DROP TABLE IF EXISTS fgst_data;
   CREATE TABLE `fgst_data` (
    `user` VARCHAR(45) NOT NULL,

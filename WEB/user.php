@@ -11,6 +11,11 @@
   ?>
   <html>
   <head>
+      <script>
+        function logout() {
+            document.location = "logout.php";
+        }
+      </script>
   </head>
   <body>
 
@@ -26,7 +31,7 @@
         $stmt->fetch();
         $stmt->close();
         ?>
-
+        <button type="button" style="position:absolute;top:10px;right:10px;" onclick="logout()">Logout</button>
           <div style="margin:auto;width:50%;text-align:center">
             <h1>
               Hello <?php echo $_SESSION['user']; ?>!
@@ -47,7 +52,18 @@
               Which leaves you with $<?php echo $original-$used; ?>!
             </h1>
           </div>
-
+          <div style="margin:auto;width:50%;text-align:center">
+              <h1>
+                  Have you spent anything recently?
+              </h1>
+          </div>
+          <div style="margin:auto;width:50%;text-align:center">
+              <form method="post" action="update.php">
+                  <input type="text" name="spent" id="spent">
+                  <input type="hidden" name="used" id ="used" value="<?php echo"$used" ?>">
+                  <input type="submit" value="Update">
+              </form>
+          </div
         <?php
       }
       elseif ($_SESSION['access'] == 'admin') {
