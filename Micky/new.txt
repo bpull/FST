@@ -1,0 +1,8 @@
+Please select which company you would like to research
+1) Google
+2) Apple
+3) Yahoo
+4) Tesla
+5) Amazon
+Would you like to recieve news about this company as well: yes/no - 
+gathering the news from url:  http://www.google.com/finance/company_news?output=json&q=GOOGL&start=0&num=1000
