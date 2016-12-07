@@ -1,17 +1,51 @@
 from __future__ import print_function
 from googlefinance import getQuotes,getNews
 
-fp = open("nasdaqlisted.txt","r")
-symbols = []
-for line in fp:
-    word = []
-    for letter in line:
-        if letter != "|" and letter != ".":
-            word.append(letter)
-        else:
-            break
-    word = ''.join(word)
-    symbols.append(word)
+#TODO add time. don't let run after 4pm and before 9am
+
+def newsGet(company,fp):
+    print("\ngathering the news from ",end="")
+    try:
+        news = getNews(company)
+        print()
+        counter = 0
+        for article in news:
+            print(article["t"])
+            try:
+                fp.write(article["t"]+"\n")
+            except:
+                pass
+            counter += 1
+            if counter == how_many:
+                break
+    except:
+        print("\nSorry, an error occured in the google search")
+
+def quotes(company,fp):
+    try:
+        quote = getQuotes(company)
+    except:
+        print("Can not get financial data for this company")
+
+    for item in quote[0]:
+        fp.write(item+"="+quote[0][item]+"\n")
+        print(item,"=",quote[0][item])
+
+def getStockSymbols():
+    fp = open("nasdaqlisted.txt","r")
+    symbols = []
+    for line in fp:
+        word = []
+        for letter in line:
+            if letter != "|" and letter != ".":
+                word.append(letter)
+            else:
+                break
+        word = ''.join(word)
+        symbols.append(word)
+    return symbols
+
+symbols = getStockSymbols()
 picked = False
 company = "n/a"
 
@@ -42,31 +76,12 @@ while not news:
     elif answer == "no" or answer == "n":
         news = True
 
-
-
 fp = open("financialdata"+company+".txt","w")
 
 if want_news:
+    newsGet(company,fp)
 
-    print("\ngathering the news from ",end="")
-    try:
-        news = getNews(company)
-        print()
-        counter = 0
-        for article in news:
-            print(article["t"])
-            try:
-                fp.write(article["t"]+"\n")
-            except:
-                pass
-            counter += 1
-            if counter == how_many:
-                break
-    except:
-        print("\nSorry, an error occured in the google search")
+
     print()
-quote = getQuotes(company)
-for item in quote[0]:
-    fp.write(item+"="+quote[0][item]+"\n")
-    print(item,"=",quote[0][item])
+quotes(company,fp)
 print()
