@@ -1,20 +1,18 @@
-Alphabet Inc: The Future of Google Stock Depends on This
-Endurance Wealth Management Inc. Has $4033000 Position in Alphabet Inc. (GOOGL)
 Index=NASDAQ
-ExtHrsChange=-1.16
-LastTradePrice=776.18
-LastTradeWithCurrency=776.18
-PreviousClosePrice=778.22
-LastTradeDateTime=2016-12-06T16:00:02Z
-ExtHrsChangePercent=-0.15
-ExtHrsLastTradePrice=775.02
-ChangePercent=-2.04
+ExtHrsChange=-1.45
+LastTradePrice=791.47
+LastTradeWithCurrency=791.47
+PreviousClosePrice=776.18
+LastTradeDateTime=2016-12-07T16:00:02Z
+ExtHrsChangePercent=-0.18
+ExtHrsLastTradePrice=790.02
+ChangePercent=+15.29
 ID=694653
 LastTradeTime=4:00PM EST
-LastTradeDateTimeLong=Dec 6, 4:00PM EST
+LastTradeDateTimeLong=Dec 7, 4:00PM EST
 Yield=
 Dividend=
 LastTradeSize=2
 StockSymbol=GOOGL
-ExtHrsLastTradeWithCurrency=775.02
-ExtHrsLastTradeDateTimeLong=Dec 6, 7:52PM EST
+ExtHrsLastTradeWithCurrency=790.02
+ExtHrsLastTradeDateTimeLong=Dec 7, 6:08PM EST

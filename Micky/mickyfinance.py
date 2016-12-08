@@ -45,43 +45,44 @@ def getStockSymbols():
         symbols.append(word)
     return symbols
 
-symbols = getStockSymbols()
-picked = False
-company = "n/a"
+if __name__ == '__main__':
+    symbols = getStockSymbols()
+    picked = False
+    company = "n/a"
 
-print("Please enter a company's stock symbol - ",end="")
-while not picked:
-    company = raw_input()
-    if company in symbols:
-        print("Looking up stock data for",company)
-        picked = True
-    else:
-        print("Company not found, please try again - ",end="")
+    print("Please enter a company's stock symbol - ",end="")
+    while not picked:
+        company = raw_input()
+        if company in symbols:
+            print("Looking up stock data for",company)
+            picked = True
+        else:
+            print("Company not found, please try again - ",end="")
 
-news = False
-want_news = False
-while not news:
-    print("\nWould you like to recieve news headlines about this company as well: yes/no - ",end="")
-    answer = raw_input()
-    if answer == "yes" or answer == "y":
-        correct = False
-        while not correct:
-            print("\nHow many would you like? (1:999) - ",end="")
-            how_many = raw_input()
-            how_many = int(how_many)
-            if how_many > 0 and how_many < 1000:
-                correct = True
-        want_news = True
-        news = True
-    elif answer == "no" or answer == "n":
-        news = True
+    news = False
+    want_news = False
+    while not news:
+        print("\nWould you like to recieve news headlines about this company as well: yes/no - ",end="")
+        answer = raw_input()
+        if answer == "yes" or answer == "y":
+            correct = False
+            while not correct:
+                print("\nHow many would you like? (1:999) - ",end="")
+                how_many = raw_input()
+                how_many = int(how_many)
+                if how_many > 0 and how_many < 1000:
+                    correct = True
+            want_news = True
+            news = True
+        elif answer == "no" or answer == "n":
+            news = True
 
-fp = open("financialdata"+company+".txt","w")
+    fp = open("financialdata"+company+".txt","w")
 
-if want_news:
-    newsGet(company,fp)
+    if want_news:
+        newsGet(company,fp)
 
 
+        print()
+    quotes(company,fp)
     print()
-quotes(company,fp)
-print()
