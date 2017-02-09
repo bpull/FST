@@ -18,7 +18,7 @@ class DataSet(object):
     self._labels = labels
     self._epochs_completed = 0
     self._index_in_epoch = 0
-    self._num_examples = 20060
+    self._num_examples = 252
 
   @property
   def input(self):
@@ -68,13 +68,13 @@ def read_data_sets(dtype=tf.float32):
     test_labels = []
     count = 0
 
-    filename_queue = tf.train.string_input_producer(["learn.csv"])
+    filename_queue = tf.train.string_input_producer(["ko.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [[1],[1],[1],[1]]
-    volatile, end1, end2, idk = tf.decode_csv(value, record_defaults=default_values)
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
+    volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
 
     print "Starting train data"
@@ -84,11 +84,11 @@ def read_data_sets(dtype=tf.float32):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
 
-        for i in range(20):
+        for i in range(252):
             # Retrieve a single instance:
-            example, label = sess.run([features, idk])
+            example, label = sess.run([features, daychange])
             train_input.append(example)
-            if int(label) > 0:
+            if label > 0:
                 label = [1,0]
             else:
                 label = [0,1]
@@ -98,13 +98,13 @@ def read_data_sets(dtype=tf.float32):
         coord.request_stop()
         coord.join(threads)
 
-    filename_queue = tf.train.string_input_producer(["test.csv"])
+    filename_queue = tf.train.string_input_producer(["ko.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [[1],[1],[1],[1]]
-    volatile, end1, end2, idk = tf.decode_csv(value, record_defaults=default_values)
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
+    volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
 
     print "Starting test data"
@@ -114,11 +114,11 @@ def read_data_sets(dtype=tf.float32):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
 
-        for i in range(5):
+        for i in range(252):
         # Retrieve a single instance:
-            example, label = sess.run([features, idk])
+            example, label = sess.run([features, daychange])
             test_input.append(example)
-            if int(label) > 0:
+            if label > 0:
                 count+=1
                 label = [1,0]
             else:
@@ -136,8 +136,8 @@ def read_data_sets(dtype=tf.float32):
     data_sets.train = DataSet(train_input, train_labels, dtype=dtype)
     data_sets.test = DataSet(test_input, test_labels, dtype=dtype)
 
-    count = (count/5)
-    print count
+    #count = (count/5)
+    #print count
 
     return data_sets
 
@@ -187,23 +187,24 @@ print "Teaching the Network"
 # for i in range(1000):
 #   batch = credit.train.next_batch(200)
 #   sess.run(train_step, feed_dict={x: batch[0], y_: batch[1]})
-for i in range(2):
-    batch_xs, batch_ys = credit.train.next_batch(10)
-    print batch_xs[:5]
-    print batch_ys[:5]
+for i in range(4):
+    batch_xs, batch_ys = credit.train.next_batch(63)
+    #print batch_xs[:5]
+    #print batch_ys[:2]
     batch_ys = np.reshape(batch_ys, [-1, 2])
-    if i%100 == 0:
-        train_accuracy = accuracy.eval(feed_dict={
-            x:batch_xs, y_: batch_ys})
-        acc = sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
-        print("step %d, batch training accuracy %g - %g"%(i, train_accuracy, acc))
-        trainacc = sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
-        print("step %d, whole training accuracy %g"%(i, trainacc))
+    #if i%100 == 0:
+    train_accuracy = accuracy.eval(feed_dict={
+        x:batch_xs, y_: batch_ys})
+    acc = sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+    print("step %d, batch training accuracy %g"%(i, train_accuracy))
+    trainacc = sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+    #print("step %d, whole training accuracy %g"%(i, trainacc))
 
     train_step.run(feed_dict={x: batch_xs, y_: batch_ys})
-print sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
 
+sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+print "Test Accuracy"
 print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
 sess.close()
