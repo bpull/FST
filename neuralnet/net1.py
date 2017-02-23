@@ -207,4 +207,21 @@ correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 print "Test Accuracy"
 print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+
+print"Saving the Model"
+saver = tf.train.Saver()
+saver.save(sess, 'saved-model')
+print"Model saved to 'saved-model.meta'"
 sess.close()
+
+#all further code is used to load the saved model and run the testing data again
+print"Loading saved model and starting new session"
+with tf.Session() as sess:
+    sess.run(tf.initialize_all_variables())
+    saver.restore(sess, tf.train.latest_checkpoint('./'))
+    print("Model restored running testing data again")
+    sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print "Test Accuracy round 2"
+    print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
