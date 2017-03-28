@@ -1,6 +1,6 @@
 import subprocess,os
 #print subprocess.check_output(["python","hello.py"])
-fp = open("justtick.txt","r")
+fp = open("justtick9.txt","r")
 
 for line in fp:
     for i in range(2007,2017,1):
