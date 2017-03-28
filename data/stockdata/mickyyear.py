@@ -8,8 +8,9 @@ for line in fp:
         if not os.path.exists(newdir):
             os.makedirs(newdir)
         for j in range(1,13,1):
-            try:
-                print "writing to "+newdir+str(j)
-                os.system("python tradeCalendar2.py " +str(j)+" "+str(i)+" | python stockData.py "+line.strip()+" > "+newdir+str(j))
-            except:
-                pass
+            if not os.path.exists(newdir+str(j)):
+                try:
+                    print "writing to "+newdir+str(j)
+                    os.system("python tradeCalendar2.py " +str(j)+" "+str(i)+" | python stockData.py "+line.strip()+" > "+newdir+str(j))
+                except:
+                    pass
