@@ -66,6 +66,7 @@ def read_data_sets(dtype=tf.float32):
     train_labels = []
     test_input = []
     test_labels = []
+    count = 0
 
     filename_queue = tf.train.string_input_producer(["ko.csv"])
 
@@ -75,9 +76,8 @@ def read_data_sets(dtype=tf.float32):
     default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
     volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
-    daychange = tf.pack([daychange])
 
-    print "Starting to load train data"
+    print "Starting train data"
 
     with tf.Session() as sess:
     # Start populating the filename queue.
@@ -88,7 +88,12 @@ def read_data_sets(dtype=tf.float32):
             # Retrieve a single instance:
             example, label = sess.run([features, daychange])
             train_input.append(example)
+            # if label > 0:
+            #     label = [1,0]
+            # else:
+            #     label = [0,1]
             train_labels.append(label)
+            #print sess.run([features, default])
 
         coord.request_stop()
         coord.join(threads)
@@ -101,9 +106,8 @@ def read_data_sets(dtype=tf.float32):
     default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
     volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
-    daychange = tf.pack([daychange])
 
-    print "Starting to load test data"
+    print "Starting test data"
 
     with tf.Session() as sess:
     # Start populating the filename queue.
@@ -114,6 +118,11 @@ def read_data_sets(dtype=tf.float32):
         # Retrieve a single instance:
             example, label = sess.run([features, daychange])
             test_input.append(example)
+            # if label > 0:
+            #     count+=1
+            #     label = [1,0]
+            # else:
+            #     label = [0,1]
             test_labels.append(label)
 
         coord.request_stop()
@@ -127,6 +136,9 @@ def read_data_sets(dtype=tf.float32):
     data_sets.train = DataSet(train_input, train_labels, dtype=dtype)
     data_sets.test = DataSet(test_input, test_labels, dtype=dtype)
 
+    #count = (count/5)
+    #print count
+
     return data_sets
 
 def weight_variable(shape):
@@ -138,6 +150,7 @@ def bias_variable(shape):
   return tf.Variable(initial)
 
 credit = read_data_sets()
+sess = tf.InteractiveSession()
 
 print "Data Successfully Read In"
 print "Starting to learn Neural Network Structure"
@@ -157,34 +170,59 @@ x_2 = tf.nn.relu(tf.matmul(x_1, W2)+b2)
 W3 = weight_variable([250, 1])
 b3 = bias_variable([1])
 
-y = (tf.matmul(x_2, W3) + b3)
+y = tf.nn.softmax(tf.matmul(x_2, W3) + b3)
 y_ = tf.placeholder(tf.float32, [None, 1])
 
-loss = tf.contrib.losses.squared(y_, y)
-train_step = tf.train.GradientDescentOptimizer(0.005).minimize(loss)
-init = tf.initialize_all_variables()
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+# cross_entropy = -tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1])
+#loss = tf.reduce_mean(tf.pow(tf.sub(tf.log(y),y_), 2))
+#loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+
+# train_step = tf.train.AdamOptimizer(1e-12).minimize(cross_entropy)
+train_step = tf.train.GradientDescentOptimizer(0.05).minimize(cross_entropy)
+
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+sess.run(tf.initialize_all_variables())
 
 
 print "Teaching the Network"
 
-with tf.Session() as sess:
-    sess.run(init)
-    for i in range(4):
-        batch_xs, batch_ys = credit.train.next_batch(63)
-        batch_ys = np.reshape(batch_ys, [-1, 1])
+#i think everything up is right?
+#not sure how to run on our data. check below
+# for i in range(1000):
+#   batch = credit.train.next_batch(200)
+#   sess.run(train_step, feed_dict={x: batch[0], y_: batch[1]})
+for i in range(4):
+    batch_xs, batch_ys = credit.train.next_batch(63)
+    print batch_xs[:5]
+    print batch_ys[:5]
+    batch_ys = np.reshape(batch_ys, [-1, 1])
+    #if i%100 == 0:
+    # acc = sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+    train_step.run(feed_dict={x: batch_xs, y_: batch_ys})
 
-        sess.run(train_step, feed_dict={x:batch_xs, y_: batch_ys})
+    train_accuracy = accuracy.eval(feed_dict={x:batch_xs, y_: batch_ys})
+    print("step %d, batch training accuracy %g"%(i, train_accuracy))
+    print (sess.run(train_step, feed_dict={x:batch_xs, y_:batch_ys}))
+    #trainacc = sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+    #print("step %d, whole training accuracy %g"%(i, trainacc))
 
-        print i
-        print sess.run(y, feed_dict={x:batch_xs, y_: batch_ys})
+    #train_step.run(feed_dict={x: batch_xs, y_: batch_ys})
 
-    print"Saving the Model"
-    saver = tf.train.Saver()
-    saver.save(sess, 'saved-model')
-    print"Model saved to 'saved-model.meta'"
-    sess.close()
+#sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+#correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+#accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+#print "Test Accuracy"
+#print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
 
-#all further code is used to load the saved model and run the testing data again
+print"Saving the Model"
+saver = tf.train.Saver()
+saver.save(sess, 'saved-model')
+print"Model saved to 'saved-model.meta'"
+sess.close()
+
+# #all further code is used to load the saved model and run the testing data again
 # print"Loading saved model and starting new session"
 # with tf.Session() as sess:
 #     sess.run(tf.initialize_all_variables())

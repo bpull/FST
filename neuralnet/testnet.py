@@ -66,6 +66,7 @@ def read_data_sets(dtype=tf.float32):
     train_labels = []
     test_input = []
     test_labels = []
+    count = 0
 
     filename_queue = tf.train.string_input_producer(["ko.csv"])
 
@@ -138,60 +139,68 @@ def bias_variable(shape):
   return tf.Variable(initial)
 
 credit = read_data_sets()
+#sess = tf.InteractiveSession()
 
 print "Data Successfully Read In"
 print "Starting to learn Neural Network Structure"
 
-x = tf.placeholder(tf.float32, [None, 3])
+'''
+A logistic regression learning algorithm example using TensorFlow library.
+This example is using the MNIST database of handwritten digits
+(http://yann.lecun.com/exdb/mnist/)
+Author: Aymeric Damien
+Project: https://github.com/aymericdamien/TensorFlow-Examples/
+'''
 
-W1 = weight_variable([3, 500])
-b1 = bias_variable([500])
+# Parameters
+learning_rate = 0.01
+training_epochs = 4
+batch_size = 63
+display_step = 1
 
-x_1 = tf.nn.relu(tf.matmul(x, W1) + b1)
+# tf Graph Input
+x = tf.placeholder(tf.float32, [None, 3]) # mnist data image of shape 28*28=784
+y = tf.placeholder(tf.float32, [None, 1]) # 1
 
-W2 = weight_variable([500, 250])
-b2 = bias_variable([250])
+# Set model weights
+W = tf.Variable(tf.zeros([3, 1]))
+b = tf.Variable(tf.zeros([1]))
 
-x_2 = tf.nn.relu(tf.matmul(x_1, W2)+b2)
+# Construct model
+pred = tf.nn.softmax(tf.matmul(x, W) + b) # Softmax
 
-W3 = weight_variable([250, 1])
-b3 = bias_variable([1])
+# Minimize error using cross entropy
+cost = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred), reduction_indices=1))
+# Gradient Descent
+optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
-y = (tf.matmul(x_2, W3) + b3)
-y_ = tf.placeholder(tf.float32, [None, 1])
-
-loss = tf.contrib.losses.squared(y_, y)
-train_step = tf.train.GradientDescentOptimizer(0.005).minimize(loss)
+# Initializing the variables
 init = tf.initialize_all_variables()
 
-
-print "Teaching the Network"
-
+# Launch the graph
 with tf.Session() as sess:
     sess.run(init)
-    for i in range(4):
-        batch_xs, batch_ys = credit.train.next_batch(63)
-        batch_ys = np.reshape(batch_ys, [-1, 1])
 
-        sess.run(train_step, feed_dict={x:batch_xs, y_: batch_ys})
+    # Training cycle
+    for epoch in range(training_epochs):
+        avg_cost = 0.
+        total_batch = 4
+        # Loop over all batches
+        for i in range(total_batch):
+            batch_xs, batch_ys = credit.train.next_batch(batch_size)
+            # Run optimization op (backprop) and cost op (to get loss value)
+            _, c = sess.run([optimizer, cost], feed_dict={x: batch_xs,
+                                                          y: batch_ys})
+            # Compute average loss
+            avg_cost += c / total_batch
+        # Display logs per epoch step
+        if (epoch+1) % display_step == 0:
+            print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
-        print i
-        print sess.run(y, feed_dict={x:batch_xs, y_: batch_ys})
+    print("Optimization Finished!")
 
-    print"Saving the Model"
-    saver = tf.train.Saver()
-    saver.save(sess, 'saved-model')
-    print"Model saved to 'saved-model.meta'"
-    sess.close()
-
-#all further code is used to load the saved model and run the testing data again
-# print"Loading saved model and starting new session"
-# with tf.Session() as sess:
-#     sess.run(tf.initialize_all_variables())
-#     saver.restore(sess, tf.train.latest_checkpoint('./'))
-#     print("Model restored running testing data again")
-#     sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
-#     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
-#     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-#     print "Test Accuracy round 2"
-#     print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+    # Test model
+    correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
+    # Calculate accuracy
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print("Accuracy:", accuracy.eval({x: credit.test.input, y: credit.test.labels}))

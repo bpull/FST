@@ -66,6 +66,7 @@ def read_data_sets(dtype=tf.float32):
     train_labels = []
     test_input = []
     test_labels = []
+    count = 0
 
     filename_queue = tf.train.string_input_producer(["ko.csv"])
 
@@ -138,6 +139,7 @@ def bias_variable(shape):
   return tf.Variable(initial)
 
 credit = read_data_sets()
+#sess = tf.InteractiveSession()
 
 print "Data Successfully Read In"
 print "Starting to learn Neural Network Structure"
@@ -157,26 +159,63 @@ x_2 = tf.nn.relu(tf.matmul(x_1, W2)+b2)
 W3 = weight_variable([250, 1])
 b3 = bias_variable([1])
 
-y = (tf.matmul(x_2, W3) + b3)
+y = tf.matmul(x_2, W3) + b3
 y_ = tf.placeholder(tf.float32, [None, 1])
+
 
 loss = tf.contrib.losses.squared(y_, y)
 train_step = tf.train.GradientDescentOptimizer(0.005).minimize(loss)
+#correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+#accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 init = tf.initialize_all_variables()
+#sess.run(tf.initialize_all_variables())
 
 
 print "Teaching the Network"
 
+#i think everything up is right?
+#not sure how to run on our data. check below
+# for i in range(1000):
+#   batch = credit.train.next_batch(200)
+#   sess.run(train_step, feed_dict={x: batch[0], y_: batch[1]})
 with tf.Session() as sess:
     sess.run(init)
-    for i in range(4):
-        batch_xs, batch_ys = credit.train.next_batch(63)
+    for i in range(252):
+        batch_xs, batch_ys = credit.train.next_batch(1)
+        #print batch_xs
+        #print batch_ys
         batch_ys = np.reshape(batch_ys, [-1, 1])
+        #if i%100 == 0:
+        #train_accuracy = accuracy.eval(feed_dict={x:batch_xs, y_: batch_ys})
+        # acc = sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+
+        # Display logs per epoch step
+        # c = sess.run(loss, feed_dict={x:batch_xs, y_: batch_ys})
+        # print ("loss is ", "{:.9f}".format(c))
 
         sess.run(train_step, feed_dict={x:batch_xs, y_: batch_ys})
 
+        output = tf.sub(y, 0)
         print i
-        print sess.run(y, feed_dict={x:batch_xs, y_: batch_ys})
+        print sess.run(y,1, feed_dict={x:batch_xs, y_: batch_ys})
+
+        #print("step %d, batch training accuracy %g"%(i, train_accuracy))
+        #print(sess.run(tf.argmax(y,1), feed_dict={x:batch_xs}))
+        #_, w_out, b_out= sess.run([train_step, W3, b], feed_dict={x: batch_xs, y_: batch_ys})
+        #print (w_out)
+        # trainacc = sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+        #print("step %d, whole training accuracy %g"%(i, trainacc))
+
+        #train_step.run(feed_dict={x: batch_xs, y_: batch_ys})
+
+        # print("Epoch:", '%04d' % (i), "cost=", "{:.9f}".format(c), \
+        #     "W=", sess.run(W3), "b=", sess.run(b3))
+
+    #sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+    #correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    #print "Test Accuracy"
+    #print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
 
     print"Saving the Model"
     saver = tf.train.Saver()
@@ -184,7 +223,7 @@ with tf.Session() as sess:
     print"Model saved to 'saved-model.meta'"
     sess.close()
 
-#all further code is used to load the saved model and run the testing data again
+# #all further code is used to load the saved model and run the testing data again
 # print"Loading saved model and starting new session"
 # with tf.Session() as sess:
 #     sess.run(tf.initialize_all_variables())
