@@ -67,13 +67,13 @@ def read_data_sets(dtype=tf.float32):
     test_input = []
     test_labels = []
 
-    filename_queue = tf.train.string_input_producer(["ko.csv"])
+    filename_queue = tf.train.string_input_producer(["../data/stockdata/A/A.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
-    volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([],dtype=tf.string)]
+    volatile, end1, end2, daychange, date = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
     daychange = tf.pack([daychange])
 
@@ -93,13 +93,13 @@ def read_data_sets(dtype=tf.float32):
         coord.request_stop()
         coord.join(threads)
 
-    filename_queue = tf.train.string_input_producer(["ko.csv"])
+    filename_queue = tf.train.string_input_producer(["../data/stockdata/A/A.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32)]
-    volatile, end1, end2, daychange = tf.decode_csv(value, record_defaults=default_values)
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([], dtype=tf.string)]
+    volatile, end1, end2, daychange, date = tf.decode_csv(value, record_defaults=default_values)
     features = tf.pack([volatile, end1, end2])
     daychange = tf.pack([daychange])
 
