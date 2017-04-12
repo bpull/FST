@@ -14,7 +14,7 @@ class DataSet(object):
     self._labels = labels
     self._epochs_completed = 0
     self._index_in_epoch = 0
-    self._num_examples = 252
+    self._num_examples = 2509
 
   @property
   def input(self):
@@ -63,15 +63,15 @@ def read_data_sets(dtype=tf.float32):
     test_input = []
     test_labels = []
 
-    filename_queue = tf.train.string_input_producer(["../data/stockdata/A/A.csv"])
+    filename_queue = tf.train.string_input_producer(["../data/stockdata/gooddata/A/A.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([],dtype=tf.string)]
-    volatile, end1, end2, daychange, date = tf.decode_csv(value, record_defaults=default_values)
-    features = tf.pack([volatile, end1, end2])
-    daychange = tf.pack([daychange])
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([],dtype=tf.string)]
+    volatile, change1, nightchange2, daychange, end1, end2, date = tf.decode_csv(value, record_defaults=default_values)
+    features = tf.pack([volatile, change1, nightchange2, daychange, end1])
+    end2 = tf.pack([end2])
 
     print "Starting to load train data"
 
@@ -80,24 +80,24 @@ def read_data_sets(dtype=tf.float32):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
 
-        for i in range(252):
+        for i in range(2509):
             # Retrieve a single instance:
-            example, label = sess.run([features, daychange])
+            example, label = sess.run([features, end2])
             train_input.append(example)
             train_labels.append(label)
 
         coord.request_stop()
         coord.join(threads)
 
-    filename_queue = tf.train.string_input_producer(["../data/stockdata/A/A.csv"])
+    filename_queue = tf.train.string_input_producer(["../data/stockdata/gooddata/AAL/AAL.csv"])
 
     reader = tf.TextLineReader()
     key, value = reader.read(filename_queue)
 
-    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([], dtype=tf.string)]
-    volatile, end1, end2, daychange, date = tf.decode_csv(value, record_defaults=default_values)
-    features = tf.pack([volatile, end1, end2])
-    daychange = tf.pack([daychange])
+    default_values = [tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32),tf.constant([], dtype=tf.float32), tf.constant([],dtype=tf.string)]
+    volatile, change1, nightchange2, daychange, end1, end2, date = tf.decode_csv(value, record_defaults=default_values)
+    features = tf.pack([volatile, change1, nightchange2, daychange, end1])
+    end2 = tf.pack([end2])
 
     print "Starting to load test data"
 
@@ -106,9 +106,9 @@ def read_data_sets(dtype=tf.float32):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
 
-        for i in range(252):
+        for i in range(2509):
         # Retrieve a single instance:
-            example, label = sess.run([features, daychange])
+            example, label = sess.run([features, end2])
             test_input.append(example)
             test_labels.append(label)
 
@@ -133,14 +133,14 @@ def bias_variable(shape):
   initial = tf.constant(0.1, shape=shape)
   return tf.Variable(initial)
 
-credit = read_data_sets()
+stockInfo = read_data_sets()
 
 print "Data Successfully Read In"
 print "Starting to learn Neural Network Structure"
 
-x = tf.placeholder(tf.float32, [None, 3])
+x = tf.placeholder(tf.float32, [None, 5])
 
-W1 = weight_variable([3, 500])
+W1 = weight_variable([5, 500])
 b1 = bias_variable([500])
 
 x_1 = tf.nn.relu(tf.matmul(x, W1) + b1)
@@ -165,8 +165,8 @@ print "Teaching the Network"
 
 with tf.Session() as sess:
     sess.run(init)
-    for i in range(4):
-        batch_xs, batch_ys = credit.train.next_batch(63)
+    for i in range(13):
+        batch_xs, batch_ys = stockInfo.train.next_batch(193)
         batch_ys = np.reshape(batch_ys, [-1, 1])
 
         sess.run(train_step, feed_dict={x:batch_xs, y_: batch_ys})
@@ -174,12 +174,12 @@ with tf.Session() as sess:
         print i
         print sess.run(y, feed_dict={x:batch_xs, y_: batch_ys})
 
-    ys = sess.run(y, feed_dict={x:batch_xs, y_: batch_ys})
+    ys = sess.run(y, feed_dict={x:stockInfo.test.input, y_: stockInfo.test.labels})
     print "Done Teaching, Now graphing"
     try:
-        fig = plt.figure(figsize=(6,4))
-        plt.plot(ys[:20], color='blue')
-        plt.plot(credit.train.labels[:20], color='black')
+        fig = plt.figure(figsize=(10,7))
+        plt.plot(ys[:50], color='blue')
+        plt.plot(stockInfo.test.labels[:50], color='black')
         plt.show()
     except Exception as e:
         print str(e)
@@ -196,8 +196,8 @@ with tf.Session() as sess:
 #     sess.run(tf.initialize_all_variables())
 #     saver.restore(sess, tf.train.latest_checkpoint('./'))
 #     print("Model restored running testing data again")
-#     sess.run(accuracy, feed_dict={x: credit.train.input, y_: credit.train.labels})
+#     sess.run(accuracy, feed_dict={x: stockInfo.train.input, y_: stockInfo.train.labels})
 #     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 #     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 #     print "Test Accuracy round 2"
-#     print sess.run(accuracy, feed_dict={x: credit.test.input, y_: credit.test.labels})
+#     print sess.run(accuracy, feed_dict={x: stockInfo.test.input, y_: stockInfo.test.labels})
