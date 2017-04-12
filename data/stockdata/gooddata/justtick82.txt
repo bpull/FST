@@ -1,0 +1,5 @@
+SNA
+SNI
+SNPS
+SO
+SPG

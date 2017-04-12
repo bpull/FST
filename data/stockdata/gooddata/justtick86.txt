@@ -1,0 +1,5 @@
+T
+TAP
+TDC
+TDG
+TEL

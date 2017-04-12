@@ -1,0 +1,5 @@
+NUE
+NVDA
+NWL
+NWS
+NWSA

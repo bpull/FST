@@ -1,0 +1,5 @@
+LNC
+LNT
+LOW
+LRCX
+LUK

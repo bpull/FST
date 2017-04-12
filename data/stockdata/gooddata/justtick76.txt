@@ -1,0 +1,5 @@
+PXD
+PYPL
+QCOM
+QRVO
+R
