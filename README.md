@@ -1,2 +1,2 @@
-# FGST
-Financial Grant Status Tracker - 2016 Captstone ALMAO
+# FST
+Financial Status Tracker - 2017 Captstone ALMAO
